@@ -1,0 +1,373 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaushal Setu Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Mukta:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: app shell — slim header, tab bar, one working panel per tab; sal-forest green + turmeric accent */
+:root{
+  --bg:#f3f5f0; --surface:#ffffff; --sunk:#e8ece3; --fg:#17231b; --muted:#5b6b60; --line:#d3dacd;
+  --brand:#1f5b3a; --brand-ink:#ffffff; --accent:#d99a10; --accent-soft:#fbefcf;
+  --good:#2f7d4a; --good-soft:#dff0e3; --warn:#b7791f; --warn-soft:#fbecd2; --bad:#b4372b; --bad-soft:#f8dfdb;
+  --chat:#e9efe4; --bubble-in:#ffffff; --bubble-out:#d6ecd0;
+  --f-display:"Baloo 2", "Mukta", system-ui, sans-serif;
+  --f-body:"Mukta", "Noto Sans Devanagari", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1712; --surface:#17221b; --sunk:#1e2b23; --fg:#e6eee7; --muted:#9aaba0; --line:#2c3b31;
+  --brand:#5fb985; --brand-ink:#0d1a12; --accent:#f0b53a; --accent-soft:#3a2f14;
+  --good:#6cc48b; --good-soft:#1d3426; --warn:#e7a94a; --warn-soft:#3a2c14; --bad:#ec7a6c; --bad-soft:#3d1f1b;
+  --chat:#131d17; --bubble-in:#1e2b23; --bubble-out:#24452f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1712; --surface:#17221b; --sunk:#1e2b23; --fg:#e6eee7; --muted:#9aaba0; --line:#2c3b31;
+  --brand:#5fb985; --brand-ink:#0d1a12; --accent:#f0b53a; --accent-soft:#3a2f14;
+  --good:#6cc48b; --good-soft:#1d3426; --warn:#e7a94a; --warn-soft:#3a2c14; --bad:#ec7a6c; --bad-soft:#3d1f1b;
+  --chat:#131d17; --bubble-in:#1e2b23; --bubble-out:#24452f; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
+.brandmark{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:10px;background:var(--brand);display:grid;place-items:center}
+.logo svg{width:28px;height:28px}
+h1{font-family:var(--f-display);font-weight:800;font-size:1.75rem;line-height:1;margin:0;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:.9rem;margin:2px 0 0}
+.demo-flag{font-size:.78rem;font-weight:600;background:var(--accent-soft);color:var(--fg);border:1px solid var(--accent);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.context{display:flex;flex-wrap:wrap;gap:8px;font-size:.85rem;color:var(--muted);margin-bottom:14px}
+.context span{background:var(--sunk);padding:3px 10px;border-radius:6px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:2px solid var(--line);margin-bottom:20px}
+nav.tabs button{font:inherit;font-weight:600;background:none;border:0;color:var(--muted);padding:10px 14px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+nav.tabs button:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hi{font-family:var(--f-body);font-weight:500;color:var(--muted);font-size:.85em}
+
+h2{font-family:var(--f-display);font-weight:700;font-size:1.3rem;margin:0 0 4px;text-wrap:balance}
+.lede{color:var(--muted);margin:0 0 16px;max-width:68ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi b{display:block;font-family:var(--f-display);font-size:1.6rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi small{color:var(--muted);font-size:.8rem}
+.kpi.bad b{color:var(--bad)} .kpi.warn b{color:var(--warn)} .kpi.good b{color:var(--good)}
+
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle;font-variant-numeric:tabular-nums}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--sunk)}
+tbody tr.sel{background:var(--accent-soft)}
+.mono{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.pill.high{background:var(--bad-soft);color:var(--bad)}
+.pill.med{background:var(--warn-soft);color:var(--warn)}
+.pill.low{background:var(--good-soft);color:var(--good)}
+.bar{height:6px;background:var(--sunk);border-radius:3px;min-width:60px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px}
+.reasons{list-style:none;padding:0;margin:8px 0 12px;display:grid;gap:6px}
+.reasons li{display:flex;gap:8px;align-items:flex-start;font-size:.92rem}
+.reasons li::before{content:"";flex:none;width:8px;height:8px;margin-top:8px;border-radius:2px;background:var(--bad)}
+.reasons li.w::before{background:var(--warn)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-weight:600;font-size:.9rem;border-radius:8px;padding:7px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn:hover{filter:brightness(1.05)}
+.who{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.who h3{font-family:var(--f-display);font-size:1.15rem;margin:0}
+.co-heat{display:grid;grid-template-columns:auto repeat(5,minmax(0,1fr));gap:4px;font-size:.8rem;margin-top:10px}
+.co-heat div{padding:6px 4px;text-align:center;border-radius:4px;font-variant-numeric:tabular-nums}
+.co-heat .h{color:var(--muted);font-weight:600;background:none}
+.co-heat .rl{text-align:left;color:var(--muted);background:none;white-space:nowrap}
+.note{font-size:.82rem;color:var(--muted);margin-top:10px}
+
+/* Passport */
+.passport{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:20px;border:2px solid var(--brand);border-radius:14px;padding:20px;background:var(--surface);position:relative}
+@media (max-width:640px){.passport{grid-template-columns:minmax(0,1fr)}}
+.passport .eyebrow{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);font-weight:700}
+.passport h3{font-family:var(--f-display);font-size:1.5rem;margin:2px 0 0}
+.skill{display:grid;grid-template-columns:minmax(0,1fr) 110px 44px;gap:10px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+.skill .bar{height:8px}
+.skill b{font-variant-numeric:tabular-nums;text-align:right}
+.lvl{font-size:.72rem;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px}
+.qrbox{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.qrbox canvas{width:160px;height:160px;background:#fff;padding:8px;border-radius:8px;border:1px solid var(--line)}
+.verify{margin-top:14px;padding:12px;border-radius:10px;background:var(--good-soft);color:var(--fg);font-size:.9rem}
+.verify[hidden]{display:none}
+select{font:inherit;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+
+/* Chat */
+.phone{max-width:400px;margin:0 auto;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--chat);display:flex;flex-direction:column;height:560px}
+.phone .bar-top{background:var(--brand);color:var(--brand-ink);padding:10px 14px;display:flex;gap:10px;align-items:center}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);display:grid;place-items:center;font-weight:800;color:#2a1e00;font-family:var(--f-display)}
+.phone .bar-top small{display:block;opacity:.85;font-size:.75rem;line-height:1.1}
+.msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:84%;padding:8px 11px;border-radius:12px;font-size:.92rem;line-height:1.45;box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.msg.in{background:var(--bubble-in);align-self:flex-start;border-top-left-radius:3px}
+.msg.out{background:var(--bubble-out);align-self:flex-end;border-top-right-radius:3px}
+.msg .t{display:block;font-size:.68rem;color:var(--muted);text-align:right;margin-top:2px}
+.voice{display:flex;align-items:center;gap:8px;font-size:.85rem}
+.voice .wave{flex:1;height:18px;background:repeating-linear-gradient(90deg,var(--brand) 0 2px,transparent 2px 5px);opacity:.6;border-radius:2px;min-width:90px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;border-top:1px solid var(--line);background:var(--surface)}
+.quick button{font:inherit;font-size:.85rem;border:1px solid var(--brand);color:var(--brand);background:none;border-radius:999px;padding:4px 12px;cursor:pointer}
+.quick button:disabled{opacity:.4;cursor:default}
+.side-explain{display:grid;gap:10px;align-content:start}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start}
+.step .n{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--fg);display:grid;place-items:center;font-weight:700;font-family:var(--f-display)}
+
+/* Nudge */
+.sms{max-width:340px;border-radius:16px;border:1px solid var(--line);background:var(--surface);overflow:hidden}
+.sms .head{background:var(--sunk);padding:8px 12px;font-size:.8rem;color:var(--muted);display:flex;justify-content:space-between}
+.sms .body{padding:12px;font-size:.95rem;line-height:1.55}
+.log{list-style:none;padding:0;margin:0;display:grid;gap:8px;font-size:.88rem}
+.log li{display:flex;gap:10px;align-items:baseline;padding:8px 10px;border-radius:8px;background:var(--sunk)}
+.log time{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);flex:none}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:600;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+footer{margin-top:28px;font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head><body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brandmark">
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M3 20 Q14 6 25 20" fill="none" stroke="#f0b53a" stroke-width="3" stroke-linecap="round"/><path d="M3 22h22M8 22v-4M14 22v-7M20 22v-4" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div>
+        <h1>Kaushal Setu</h1>
+        <p class="sub">Classroom data → verified skills, mother-tongue mentoring, early dropout alerts · built on GPA Care</p>
+      </div>
+    </div>
+    <span class="demo-flag">Prototype · synthetic test data</span>
+  </header>
+
+  <div class="context"><span>Govt. Polytechnic Ambikapur (demo)</span><span>Diploma CSE · Semester 3</span><span>Course: Data Structures (CO1–CO5)</span><span>Mentor: Demo Faculty</span></div>
+
+  <nav class="tabs" role="tablist" aria-label="Modules">
+    <button role="tab" id="t-dash" aria-selected="true" aria-controls="p-dash">Mentor Dashboard</button>
+    <button role="tab" id="t-pass" aria-selected="false" aria-controls="p-pass">Kaushal Passport</button>
+    <button role="tab" id="t-saathi" aria-selected="false" aria-controls="p-saathi">Saathi <span class="hi">साथी</span></button>
+    <button role="tab" id="t-nudge" aria-selected="false" aria-controls="p-nudge">Parent Nudge</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section id="p-dash" role="tabpanel" aria-labelledby="t-dash">
+    <h2>Who needs help this week</h2>
+    <p class="lede">Risk is computed from data teachers already enter: attendance, topic coverage (CCUP) and course-outcome attainment (OBE). No extra data entry. Click a student to see why they are flagged.</p>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid2">
+      <div class="panel tablewrap">
+        <table>
+          <thead><tr><th>Student</th><th>Attendance</th><th>Avg CO</th><th>Backlog</th><th>Risk</th></tr></thead>
+          <tbody id="roster"></tbody>
+        </table>
+      </div>
+      <div class="panel" id="detail"></div>
+    </div>
+  </section>
+
+  <!-- PASSPORT -->
+  <section id="p-pass" role="tabpanel" aria-labelledby="t-pass" hidden>
+    <h2>Kaushal Passport</h2>
+    <p class="lede">A skill credential built from classroom evidence, not marks alone. Each line is a course outcome the student demonstrated, with the evidence behind it. Employers verify it with one scan.</p>
+    <div class="row"><label for="pass-sel">Student</label><select id="pass-sel"></select></div>
+    <div class="passport" id="passport"></div>
+    <div class="verify" id="verify" hidden></div>
+  </section>
+
+  <!-- SAATHI -->
+  <section id="p-saathi" role="tabpanel" aria-labelledby="t-saathi" hidden>
+    <h2>Saathi — mentor in the student's own language</h2>
+    <p class="lede">Saathi already knows the student's weak course outcome from the ERP, so it starts with the exact topic. It explains in Hindi or Chhattisgarhi on WhatsApp, with voice notes and a two-minute quiz.</p>
+    <div class="grid2">
+      <div>
+        <div class="phone">
+          <div class="bar-top"><div class="avatar">सा</div><div><b>Saathi</b><small>GPA Care · WhatsApp</small></div></div>
+          <div class="msgs" id="msgs" aria-live="polite"></div>
+          <div class="quick" id="quick"></div>
+        </div>
+      </div>
+      <div class="side-explain panel">
+        <div class="step"><span class="n">1</span><div><b>ERP signal</b><br><span class="note" style="margin:0">CO3 (Stack &amp; Queue) attainment 38%, below the 50% threshold.</span></div></div>
+        <div class="step"><span class="n">2</span><div><b>Topic picked from CCUP</b><br><span class="note" style="margin:0">Unit 3 → Stack → Push/Pop, already taught in class on 9 Oct.</span></div></div>
+        <div class="step"><span class="n">3</span><div><b>Explained in Hindi</b><br><span class="note" style="margin:0">Everyday analogy first, then the technical term in English.</span></div></div>
+        <div class="step"><span class="n">4</span><div><b>Quiz result goes back to the ERP</b><br><span class="note" style="margin:0">Mentor sees the improvement; the passport evidence updates.</span></div></div>
+        <button class="btn" id="restart">Restart conversation</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- NUDGE -->
+  <section id="p-nudge" role="tabpanel" aria-labelledby="t-nudge" hidden>
+    <h2>Parent Nudge</h2>
+    <p class="lede">When risk rises, the parent hears about it the same week, in Hindi, on a basic feature phone. Today most parents learn only after the student has stopped coming.</p>
+    <div class="row"><label for="nudge-sel">Student</label><select id="nudge-sel"></select></div>
+    <div class="grid2">
+      <div class="panel">
+        <h3 style="font-family:var(--f-display);margin:0 0 10px;font-size:1.05rem">SMS preview</h3>
+        <div class="sms"><div class="head"><span>GPACARE</span><span id="sms-time"></span></div><div class="body" id="sms-body"></div></div>
+        <div class="actions" style="margin-top:14px">
+          <button class="btn primary" id="send-sms">Send SMS (simulated)</button>
+          <button class="btn" id="send-voice">Voice call (simulated)</button>
+        </div>
+        <p class="note">Demo only. No real messages are sent from this prototype.</p>
+      </div>
+      <div class="panel">
+        <h3 style="font-family:var(--f-display);margin:0 0 10px;font-size:1.05rem">Intervention log</h3>
+        <ul class="log" id="log"></ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>Kaushal Setu prototype for the Seva First Innovation Challenge 2026 · All names and figures are synthetic test data. No real student data is used.</footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const COS=["CO1 Arrays & complexity","CO2 Linked lists","CO3 Stack & queue","CO4 Trees","CO5 Searching & sorting"];
+const S=[
+ {id:"24CS03",n:"Aarti Paikra",att:58,co:[52,44,38,41,49],bl:2,par:"Shri Ramesh Paikra",v:"Lundra"},
+ {id:"24CS07",n:"Deepak Minj",att:66,co:[61,55,42,50,57],bl:1,par:"Smt. Sunita Minj",v:"Batauli"},
+ {id:"24CS11",n:"Kavita Singh",att:91,co:[84,79,76,71,82],bl:0,par:"Shri Mahesh Singh",v:"Ambikapur"},
+ {id:"24CS12",n:"Ravi Kujur",att:72,co:[58,49,46,52,60],bl:1,par:"Shri Anil Kujur",v:"Sitapur"},
+ {id:"24CS15",n:"Sneha Gupta",att:88,co:[78,74,69,65,80],bl:0,par:"Smt. Rekha Gupta",v:"Ambikapur"},
+ {id:"24CS18",n:"Manoj Tirkey",att:61,co:[49,40,35,38,44],bl:3,par:"Shri Joseph Tirkey",v:"Mainpat"},
+ {id:"24CS21",n:"Pooja Yadav",att:83,co:[70,66,61,58,72],bl:0,par:"Shri Suresh Yadav",v:"Udaipur"},
+ {id:"24CS24",n:"Sunil Ekka",att:77,co:[63,57,51,49,61],bl:0,par:"Smt. Mary Ekka",v:"Lakhanpur"},
+ {id:"24CS27",n:"Neha Sahu",att:94,co:[88,85,81,77,86],bl:0,par:"Shri Dinesh Sahu",v:"Ambikapur"},
+ {id:"24CS30",n:"Rahul Porte",att:69,co:[55,51,47,44,53],bl:1,par:"Shri Kishan Porte",v:"Darima"}
+];
+const avg=a=>Math.round(a.reduce((x,y)=>x+y,0)/a.length);
+function risk(s){
+  let sc=0; const r=[];
+  if(s.att<65){sc+=40;r.push(["b",`Attendance ${s.att}%, below the 75% CSVTU requirement`])}
+  else if(s.att<75){sc+=25;r.push(["w",`Attendance ${s.att}%, close to the 75% cut-off`])}
+  const weak=s.co.map((v,i)=>[v,i]).filter(x=>x[0]<50);
+  if(weak.length){sc+=10*weak.length;r.push([weak.length>2?"b":"w",`${weak.length} course outcome${weak.length>1?"s":""} below 50%: ${weak.map(x=>"CO"+(x[1]+1)).join(", ")}`])}
+  if(s.bl){sc+=12*s.bl;r.push([s.bl>1?"b":"w",`${s.bl} backlog paper${s.bl>1?"s":""} from Semester 1–2`])}
+  const lvl=sc>=60?"high":sc>=30?"med":"low";
+  return {sc:Math.min(sc,100),lvl,r};
+}
+S.forEach(s=>{s.k=risk(s);s.a=avg(s.co)});
+S.sort((a,b)=>b.k.sc-a.k.sc);
+const lvlTxt={high:"High",med:"Watch",low:"On track"};
+const col=v=>v>=70?"var(--good)":v>=50?"var(--warn)":"var(--bad)";
+const $=id=>document.getElementById(id);
+let cur=S[0].id;
+
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast._);toast._=setTimeout(()=>e.classList.remove("show"),2200)}
+
+/* tabs */
+const tabs=[...document.querySelectorAll('[role=tab]')];
+function show(id){tabs.forEach(t=>{const on=t.id===id;t.setAttribute("aria-selected",on);$(t.getAttribute("aria-controls")).hidden=!on});if(id==="t-saathi"&&!$("msgs").children.length)startChat();try{localStorage.setItem("ks-tab",id)}catch(e){}}
+tabs.forEach(t=>t.addEventListener("click",()=>show(t.id)));
+
+/* dashboard */
+function kpis(){
+  const h=S.filter(s=>s.k.lvl==="high").length,m=S.filter(s=>s.k.lvl==="med").length;
+  const cls=avg(S.map(s=>s.a)),att=avg(S.map(s=>s.att));
+  $("kpis").innerHTML=`<div class="kpi bad"><b>${h}</b><small>High risk, act this week</small></div><div class="kpi warn"><b>${m}</b><small>On watch</small></div><div class="kpi"><b>${att}%</b><small>Class attendance</small></div><div class="kpi"><b>${cls}%</b><small>Avg CO attainment</small></div>`;
+}
+function roster(){
+  $("roster").innerHTML=S.map(s=>`<tr data-id="${s.id}" class="${s.id===cur?"sel":""}" tabindex="0"><td><b>${s.n}</b><br><span class="mono">${s.id}</span></td><td><div style="display:flex;align-items:center;gap:6px">${s.att}%<div class="bar" style="width:60px"><i style="width:${s.att}%;background:${col(s.att>=75?80:s.att>=65?55:30)}"></i></div></div></td><td style="color:${col(s.a)};font-weight:600">${s.a}%</td><td>${s.bl}</td><td><span class="pill ${s.k.lvl}">${lvlTxt[s.k.lvl]}</span></td></tr>`).join("");
+  [...$("roster").rows].forEach(r=>{const go=()=>{cur=r.dataset.id;roster();detail()};r.addEventListener("click",go);r.addEventListener("keydown",e=>{if(e.key==="Enter")go()})});
+}
+function detail(){
+  const s=S.find(x=>x.id===cur);
+  const heat=`<div class="co-heat"><div class="h rl"></div>${COS.map((c,i)=>`<div class="h">CO${i+1}</div>`).join("")}<div class="rl">${s.n.split(" ")[0]}</div>${s.co.map(v=>`<div style="background:color-mix(in srgb, ${col(v)} 22%, transparent);color:${col(v)};font-weight:700">${v}</div>`).join("")}<div class="rl">Class avg</div>${COS.map((c,i)=>{const v=avg(S.map(x=>x.co[i]));return `<div style="background:var(--sunk)">${v}</div>`}).join("")}</div>`;
+  $("detail").innerHTML=`<div class="who"><h3>${s.n}</h3><span class="pill ${s.k.lvl}">${lvlTxt[s.k.lvl]} · score ${s.k.sc}</span></div><div class="mono">${s.id} · ${s.v}</div>
+  <ul class="reasons">${s.k.r.length?s.k.r.map(([t,x])=>`<li class="${t==="w"?"w":""}">${x}</li>`).join(""):'<li class="w" style="--x:0">No risk signals this week</li>'}</ul>
+  <div class="note" style="margin:0 0 4px">Course-outcome attainment (%)</div>${heat}
+  <div class="actions" style="margin-top:14px"><button class="btn primary" id="a-saathi">Start Saathi plan</button><button class="btn" id="a-nudge">Notify parent</button><button class="btn" id="a-pass">View passport</button></div>
+  <p class="note">Suggested action: one-to-one with mentor this week, Saathi remedial plan for the weakest CO.</p>`;
+  $("a-saathi").onclick=()=>show("t-saathi");
+  $("a-nudge").onclick=()=>{$("nudge-sel").value=s.id;nudge();show("t-nudge")};
+  $("a-pass").onclick=()=>{$("pass-sel").value=s.id;passport();show("t-pass")};
+}
+
+/* passport */
+function qr(canvas,seed){
+  const n=25,c=canvas.getContext("2d"),px=8;canvas.width=canvas.height=n*px;
+  c.fillStyle="#fff";c.fillRect(0,0,n*px,n*px);c.fillStyle="#17231b";
+  let h=0;for(const ch of seed)h=(h*31+ch.charCodeAt(0))>>>0;
+  const rnd=()=>{h^=h<<13;h>>>=0;h^=h>>17;h^=h<<5;h>>>=0;return h/4294967296};
+  const finder=(x,y)=>{for(let i=0;i<7;i++)for(let j=0;j<7;j++){const e=i===0||i===6||j===0||j===6||(i>1&&i<5&&j>1&&j<5);if(e)c.fillRect((x+i)*px,(y+j)*px,px,px)}};
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){const inF=(i<8&&j<8)||(i>n-9&&j<8)||(i<8&&j>n-9);if(!inF&&rnd()>.5)c.fillRect(i*px,j*px,px,px)}
+  finder(0,0);finder(n-7,0);finder(0,n-7);
+}
+const level=v=>v>=70?["Proficient","var(--good)","var(--good-soft)"]:v>=50?["Developing","var(--warn)","var(--warn-soft)"]:["Needs support","var(--bad)","var(--bad-soft)"];
+const evid=["3 lab programs + unit test","2 lab programs + assignment","Lab viva + unit test","Mini-project + unit test","4 lab programs + quiz"];
+function passport(){
+  const s=S.find(x=>x.id===$("pass-sel").value);
+  const pid=`KS-GPA-${s.id}-2026`;
+  $("verify").hidden=true;
+  $("passport").innerHTML=`<div>
+    <div class="eyebrow">Kaushal Passport · Diploma CSE · Semester 3</div>
+    <h3>${s.n}</h3><div class="mono" style="margin-bottom:12px">${pid} · Data Structures</div>
+    ${s.co.map((v,i)=>{const[l,c,bg]=level(v);return `<div class="skill"><div>${COS[i].slice(4)}<span class="lvl" style="color:${c};background:${bg}">${l}</span><div class="note" style="margin:0">${evid[i]} · ${s.att}% attendance</div></div><div class="bar"><i style="width:${v}%;background:${c}"></i></div><b>${v}%</b></div>`}).join("")}
+  </div>
+  <div class="qrbox"><canvas id="qr" aria-label="Demo QR code"></canvas><span class="mono">${pid}</span><button class="btn primary" id="scan">Simulate employer scan</button></div>`;
+  qr($("qr"),pid);
+  $("scan").onclick=()=>{const best=s.co.map((v,i)=>[v,i]).filter(x=>x[0]>=50).map(x=>COS[x[1]].slice(4));
+    $("verify").hidden=false;$("verify").innerHTML=`<b>✓ Verified record</b> · issued by Govt. Polytechnic Ambikapur (demo) · evidence logged in GPA Care between Jul–Oct 2026.<br>Demonstrated skills: ${best.length?best.join(", "):"none above 50% yet"}.`;toast("Passport verified")};
+}
+
+/* saathi */
+const script=[
+ ["in","नमस्ते Aarti! 🙏 मैं Saathi हूँ। तुम्हारे Data Structures में <b>Stack</b> वाला topic थोड़ा कमज़ोर दिख रहा है (CO3: 38%). 5 मिनट में समझें?"],
+ ["q",["हाँ, समझाओ","बाद में"]],
+ ["in","सोचो, शादी में <b>थालियों का ढेर</b> 🍽️. नई थाली हमेशा <b>ऊपर</b> रखी जाती है, और उठाते भी <b>ऊपर</b> से हैं। यही है <b>Stack</b>: Last In, First Out (LIFO)."],
+ ["voice","Voice note · 0:42 · छत्तीसगढ़ी में सुनें"],
+ ["in","ऊपर थाली रखना = <b>push()</b><br>ऊपर से थाली उठाना = <b>pop()</b><br>ऊपर कौन-सी है देखना = <b>peek()</b>"],
+ ["q",["समझ गया, quiz दो"]],
+ ["in","Quiz 1/2: Stack में 10, 20, 30 push किया। फिर एक बार pop() किया। अब top पर कौन है?"],
+ ["q",["10","20","30"],"20"],
+ ["in","Quiz 2/2: बस-stop की <b>line</b> किस जैसी है?"],
+ ["q",["Stack","Queue"],"Queue"],
+ ["end",""]
+];
+let si=0,score=0;
+function addMsg(cls,html){const d=document.createElement("div");d.className="msg "+cls;const t=new Date();d.innerHTML=html+`<span class="t">${t.getHours()}:${String(t.getMinutes()).padStart(2,"0")}</span>`;$("msgs").appendChild(d);$("msgs").scrollTop=$("msgs").scrollHeight}
+function step(){
+  $("quick").innerHTML="";
+  while(si<script.length){
+    const [k,v,ans]=script[si];
+    if(k==="in"){addMsg("in",v);si++;continue}
+    if(k==="voice"){addMsg("in",`<div class="voice">▶<span class="wave"></span><span>${v}</span></div>`);si++;continue}
+    if(k==="q"){v.forEach(o=>{const b=document.createElement("button");b.textContent=o;b.onclick=()=>{addMsg("out",o);
+        if(ans){if(o===ans){score++;addMsg("in","✅ सही जवाब!")}else addMsg("in",`❌ सही जवाब है <b>${ans}</b>. ${ans==="20"?"30 सबसे ऊपर था, pop() ने उसे हटा दिया।":"Line में जो पहले आया, वो पहले जाता है: FIFO."}`)}
+        if(o==="बाद में"){addMsg("in","ठीक है! शाम 7 बजे फिर याद दिलाऊँगी। 🌙");$("quick").innerHTML="";return}
+        si++;step()};$("quick").appendChild(b)});return}
+    if(k==="end"){addMsg("in",`शाबाश! Score <b>${score}/2</b>. यह result तुम्हारे mentor को और Kaushal Passport में भेज दिया गया है। कल <b>Queue</b> पर बात करेंगे 👍`);si++;toast("Quiz result synced to GPA Care");return}
+  }
+}
+function startChat(){$("msgs").innerHTML="";si=0;score=0;step()}
+$("restart").onclick=startChat;
+
+/* nudge */
+const log=[["09 Oct 18:10","Manoj Tirkey","SMS delivered to parent"],["11 Oct 10:30","Manoj Tirkey","Parent visited mentor"],["14 Oct 17:45","Deepak Minj","Voice call answered by parent"]];
+function nudge(){
+  const s=S.find(x=>x.id===$("nudge-sel").value);
+  const weak=s.co.map((v,i)=>[v,i]).filter(x=>x[0]<50).length;
+  $("sms-time").textContent="Today";
+  $("sms-body").innerHTML=`नमस्ते ${s.par} जी, शासकीय पॉलिटेक्निक अंबिकापुर से। आपके बच्चे <b>${s.n}</b> की इस महीने उपस्थिति <b>${s.att}%</b> है${s.att<75?" (परीक्षा के लिए 75% ज़रूरी)":""}${weak?` और ${weak} विषय-भाग कमज़ोर हैं`:""}। कृपया इस सप्ताह mentor से मिलें या कॉल करें। — GPA Care`;
+}
+function renderLog(){$("log").innerHTML=log.slice().reverse().map(([t,n,x])=>`<li><time>${t}</time><span><b>${n}</b> · ${x}</span></li>`).join("")}
+function stamp(){const d=new Date();return `${String(d.getDate()).padStart(2,"0")} ${d.toLocaleString("en",{month:"short"})} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`}
+$("send-sms").onclick=()=>{const s=S.find(x=>x.id===$("nudge-sel").value);log.push([stamp(),s.n,"SMS sent to parent (simulated)"]);renderLog();toast("SMS queued (demo)")};
+$("send-voice").onclick=()=>{const s=S.find(x=>x.id===$("nudge-sel").value);log.push([stamp(),s.n,"Hindi voice call placed (simulated)"]);renderLog();toast("Voice call queued (demo)")};
+
+/* init */
+const opts=S.map(s=>`<option value="${s.id}">${s.n} (${s.id})</option>`).join("");
+$("pass-sel").innerHTML=opts;$("nudge-sel").innerHTML=opts;
+$("pass-sel").value=S.find(s=>s.k.lvl==="low").id;
+$("pass-sel").onchange=passport;$("nudge-sel").onchange=nudge;
+kpis();roster();detail();passport();nudge();renderLog();
+try{const t=localStorage.getItem("ks-tab");if(t&&$(t))show(t)}catch(e){}
+</script>
+</body></html>
