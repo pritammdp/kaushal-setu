@@ -198,6 +198,19 @@ label.lbl{font-weight:600;font-size:.88rem}
 @media (prefers-reduced-motion:reduce){.toast,.ivr p{transition:none}.call.ringing .avatar,.voice.playing .wave{animation:none}}
 footer{margin-top:28px;font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
 .verify-page{max-width:560px;margin:0 auto}
+
+/* Overview: brief, innovation cards, before/after, build status */
+.ov{margin-top:16px}
+.brief p{margin:0 0 10px;max-width:80ch}
+.brief p:last-child{margin-bottom:0}
+.innov .card h4{font-family:var(--f-display);font-weight:700;font-size:1rem;margin:0}
+.innov .card p{margin:0;font-size:.92rem;color:var(--muted)}
+.innov .num{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--fg);display:grid;place-items:center;font-weight:800;font-family:var(--f-display)}
+.ba td:first-child{font-weight:600;white-space:nowrap}
+.ba td.before{color:var(--muted)}
+.ba td{vertical-align:top}
+.status td:last-child{white-space:nowrap}
+@media (max-width:640px){.ba td:first-child{white-space:normal}.status td:last-child{white-space:normal}}
 </style>
 </head><body>
 
@@ -230,7 +243,15 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted);border-top:1px solid v
   <section id="p-home" role="tabpanel" aria-labelledby="t-home">
     <h2>One data trail, five people helped</h2>
     <p class="lede">Teachers already record attendance, syllabus coverage and course-outcome (CO) marks in GPA Care. Kaushal Setu turns that same data into help for each person around the student, with no extra data entry.</p>
-    <div class="grid2">
+
+    <div class="panel brief">
+      <div class="eyebrow">Kaushal Setu in brief</div>
+      <p><b>Kaushal Setu</b> (“skill bridge”) is an add-on to <b>GPA Care</b>, the ERP already running at Government Polytechnic Ambikapur, Surguja, Chhattisgarh. Teachers there already mark attendance, track syllabus coverage (CCUP) and record course-outcome (CO) marks for accreditation. Until now that data was only filed in reports.</p>
+      <p>Kaushal Setu acts on it. It <b>flags students at risk weeks before results</b> and shows why, <b>teaches their weak topics on WhatsApp in Hindi or Chhattisgarhi</b>, <b>informs parents on a basic phone</b>, issues a <b>QR-verified skill passport</b>, <b>shows each student jobs and apprenticeships nearest home first</b> (own district, then neighbouring districts, then the rest of Chhattisgarh) along with the <b>industry clusters</b> around them, <b>matches consenting students to local employers</b>, and shows the <b>Directorate of Technical Education</b> where skills fall short across colleges.</p>
+      <p>It is built for first-generation, Hindi-medium students from tribal districts, the learners that English-first portals and one-time career counselling miss.</p>
+    </div>
+
+    <div class="grid2 ov">
       <div class="panel">
         <svg class="diagram" viewBox="0 0 640 400" role="img" aria-label="GPA Care classroom data at the centre, connected to teacher, student, parent, company and DTE">
           <defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
@@ -263,12 +284,66 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted);border-top:1px solid v
           <li><span><b>Teacher:</b> see who is at risk, and why</span><button class="btn small" data-go="t-teacher" data-sub="risk">Open</button></li>
           <li><span><b>Teacher:</b> whole class weak in CO3 = teaching signal</span><button class="btn small" data-go="t-teacher" data-sub="class">Open</button></li>
           <li><span><b>Student:</b> Saathi teaches Stack in Hindi</span><button class="btn small" data-go="t-student" data-sub="saathi">Open</button></li>
+          <li><span><b>Student:</b> Mera Raasta, jobs near home and nearby industry</span><button class="btn small" data-go="t-student" data-sub="path">Open</button></li>
           <li><span><b>Parent:</b> Hindi SMS and missed-call report</span><button class="btn small" data-go="t-parent">Open</button></li>
           <li><span><b>Company:</b> type a job need, get verified matches</span><button class="btn small" data-go="t-company">Open</button></li>
           <li><span><b>Passport:</b> scan the QR with your phone</span><button class="btn small" data-go="t-pass">Open</button></li>
           <li><span><b>DTE:</b> where employer demand beats classroom supply</span><button class="btn small" data-go="t-dte">Open</button></li>
         </ol>
       </div>
+    </div>
+
+    <div class="ov innov">
+      <h3>What makes it innovative</h3>
+      <div class="grid3">
+        <div class="card"><span class="num">1</span><h4>One closed loop, no new data entry</h4><p>Weak topic found → taught in the student's own language → practised → skill verified on the passport → matched to a local job. It runs only on records teachers already keep, so it costs a teacher no extra time.</p></div>
+        <div class="card"><span class="num">2</span><h4>Jobs near home, by cluster</h4><p>Mera Raasta shows openings nearest the student's home first (own district, then neighbouring districts, then the rest of Chhattisgarh), names the industry clusters near them, such as coal and agro in Surguja, power and aluminium in Korba, or steel in Bhilai, and ranks each opening by the student's branch and strong subjects.</p></div>
+        <div class="card"><span class="num">3</span><h4>Explainable, not a black box</h4><p>Risk flags use visible rules on attendance, CO attainment and syllabus coverage, and every flag shows its reasons so a teacher can check it before acting.</p></div>
+        <div class="card"><span class="num">4</span><h4>AI with a teacher in charge</h4><p>AI drafts explanations, quizzes and job listings only from the approved syllabus; a teacher or placement officer approves. The AI never sees a student's name, phone or marks.</p></div>
+        <div class="card"><span class="num">5</span><h4>Built for those left out</h4><p>Hindi and Chhattisgarhi on WhatsApp, no app to install. Parents without a smartphone give a missed call and the college calls back with a Hindi voice message.</p></div>
+        <div class="card"><span class="num">6</span><h4>Trust by design</h4><p>The passport is digitally signed and verified by a QR scan. Students say yes before any employer sees them; companies get email only, never a phone number. DTE sees counts, never names.</p></div>
+      </div>
+      <p class="note"><b>Why no custom-trained model yet?</b> A fair dropout model needs real outcomes (who stayed, who left), and those do not exist yet for these students. Rules a teacher can check are safer today. The pilot itself creates that labelled data, plus teacher-approved Hindi and Chhattisgarhi practice content, so a model can be trained and validated in year 2.</p>
+    </div>
+
+    <div class="panel ov">
+      <h3>What was not there before</h3>
+      <div class="tablewrap">
+        <table class="ba">
+          <thead><tr><th>Area</th><th>Before</th><th>With Kaushal Setu</th></tr></thead>
+          <tbody>
+            <tr><td>Course-outcome data</td><td class="before">Collected for accreditation reports, then filed</td><td>Turned into an early warning per student and a teaching signal per class</td></tr>
+            <tr><td>Struggling students</td><td class="before">Noticed after semester results</td><td>Flagged within weeks, with reasons the teacher can check</td></tr>
+            <tr><td>Help for the student</td><td class="before">English-first material, one-time counselling</td><td>Weak topic explained on WhatsApp in Hindi or Chhattisgarhi, with practice questions the teacher approved</td></tr>
+            <tr><td>Parents</td><td class="before">Learn of trouble after the student stops coming</td><td>Teacher-approved update in their language; a missed call from a basic phone is enough</td></tr>
+            <tr><td>Career guidance</td><td class="before">Generic job portals, mostly far-off cities</td><td>Approved jobs, apprenticeships and recruitment drives nearest home first, with the industry clusters of the student's own district</td></tr>
+            <tr><td>Proof of skill</td><td class="before">Marksheet shows marks only</td><td>Signed Kaushal Passport shows which course outcomes the student has shown; verified by QR scan</td></tr>
+            <tr><td>Local employers</td><td class="before">Hire from outside; cannot trust local diplomas</td><td>Requirement in plain words, mapped to the college's own course outcomes; only students who say yes are shared</td></tr>
+            <tr><td>State (DTE)</td><td class="before">Result tables per college</td><td>District Skill-Gap Index: employer demand against verified classroom skill, across colleges</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel ov">
+      <h3>Built, not just designed</h3>
+      <p class="note" style="margin:0 0 10px">Every module below is built into the GPA Care ERP and running on the college's test (UAT) server with a demo class.</p>
+      <div class="tablewrap">
+        <table class="status">
+          <thead><tr><th>Module</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Mentor dashboard: at-risk students with reasons, class diagnosis</td><td><span class="pill low">Running on UAT</span></td></tr>
+            <tr><td>Kaushal Passport: digitally signed, public QR verification</td><td><span class="pill low">Running on UAT</span></td></tr>
+            <tr><td>Saathi on WhatsApp: weak topics, quizzes in Hindi, English and Chhattisgarhi</td><td><span class="pill low">Running on UAT</span></td></tr>
+            <tr><td>Guru Sahayak: AI drafts quiz questions, teacher approves</td><td><span class="pill low">Running on UAT</span></td></tr>
+            <tr><td>Mera Raasta: jobs and apprenticeships nearest home first, district industry clusters; AI mock interview</td><td><span class="pill low">Running on UAT</span></td></tr>
+            <tr><td>Udyog Setu: company login, consent-first interview invites</td><td><span class="pill low">Running on UAT</span></td></tr>
+            <tr><td>DTE Skill-Gap Index and college table</td><td><span class="pill low">Running on UAT</span></td></tr>
+            <tr><td>Parent nudge and missed-call Hindi voice callback</td><td><span class="pill med">Running on UAT, test mode</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Not yet used by real students or parents: the 3-month pilot at GP Ambikapur (~500 students) is the next step. Real SMS to parents waits for DLT template registration. <b>This page</b> is a clickable mock-up with synthetic data, so you can try every role without a login.</p>
     </div>
   </section>
 
